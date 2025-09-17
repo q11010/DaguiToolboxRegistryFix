@@ -5,6 +5,7 @@ using MOD_WIFdSk.PlayerPrefsHelper;
 using Boo.Lang;
 using System.Diagnostics;
 using MelonLoader;
+using System.Security;
 
 /// <summary>
 /// 当你手动修改了此命名空间，需要去模组编辑器修改对应的新命名空间，程序集也需要修改命名空间，否则DLL将加载失败！！！
@@ -18,7 +19,6 @@ namespace MOD_WIFdSk
     {
         private TimerCoroutine corUpdate;
         private static HarmonyLib.Harmony harmony;
-        private Il2CppSystem.Action<ETypeData> onSaveDataCall;
 
         /// <summary>
         /// MOD初始化，进入游戏时会调用此函数
@@ -54,7 +54,7 @@ namespace MOD_WIFdSk
             g.timer.Stop(corUpdate);
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-            RemovePinyinEntries();
+            ProbablyFastRemovePinyinEntries();
             stopwatch.Stop();
             MelonLoader.MelonLogger.Msg("[DaGuiPlayerPrefsFix] Cleaner executed on destroy, time " + stopwatch.Elapsed);
         }
@@ -76,6 +76,7 @@ namespace MOD_WIFdSk
         /// <summary>
         /// Remove all Pinyin entries from reg
         /// </summary>
+        [Obsolete("RemovePinyinEntries is Obsolete due to slowness, use ProbablyFastRemovePinyinEntries instead")]
         private void RemovePinyinEntries()
         {
             /// see https://github.com/sabresaurus/PlayerPrefsEditor/blob/1.4.1/Editor/PlayerPrefsEditor.cs#L273
@@ -110,12 +111,9 @@ namespace MOD_WIFdSk
                         if (key.EndsWith("py") || key.EndsWith("pinyin"))
                         {
                             MelonLoader.MelonLogger.Msg("[DaGuiPlayerPrefsFix] Failed Clean for entry " + name);
-
                         }
                     }
                 }
-
-
             }
             catch (System.Exception ex)
             {
@@ -126,6 +124,11 @@ namespace MOD_WIFdSk
         public void ProbablyFastRemovePinyinEntries()
         {
             PlayerPrefsHelper.PlayerPrefsHelper.RawPlayerPrefs[] rawPlayerPrefs = GetNonPinyinPlayerPrefs();
+            if (rawPlayerPrefs == null)
+            {
+                MelonLoader.MelonLogger.Msg("[DaGuiPlayerPrefsFix] No Valid PlayerPrefs, stopping");
+                return;
+            }
             PlayerPrefs.DeleteAll();
             foreach (PlayerPrefsHelper.PlayerPrefsHelper.RawPlayerPrefs raw in rawPlayerPrefs)
             {
@@ -161,19 +164,23 @@ namespace MOD_WIFdSk
                 }
                 else
                 {
-                    return new string[0];  
+                    return null;
                 }
             }
-            catch (System.Exception ex)
+            catch (System.Security.SecurityException ex)
             {
                 MelonLoader.MelonLogger.Msg("[DaGuiPlayerPrefsFix] Failed to run OnSaveData: " + ex.ToString());
-                return new string[0];
+                return null;
             }
         }
 
         private static PlayerPrefsHelper.PlayerPrefsHelper.RawPlayerPrefs[] GetNonPinyinPlayerPrefs()
         {
             string[] keys = GetNonPinyinPlayerPrefsKeys();
+            if (keys == null)
+            {
+                return null;
+            }
             List<PlayerPrefsHelper.PlayerPrefsHelper.RawPlayerPrefs> tempRawPlayerPrefs = new List<PlayerPrefsHelper.PlayerPrefsHelper.RawPlayerPrefs> ();
             foreach (string key in keys)
             {
