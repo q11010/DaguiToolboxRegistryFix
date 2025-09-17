@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Reflection;
 using UnityEngine;
+using MOD_WIFdSk.PlayerPrefsHelper;
+using Boo.Lang;
 
 /// <summary>
 /// 当你手动修改了此命名空间，需要去模组编辑器修改对应的新命名空间，程序集也需要修改命名空间，否则DLL将加载失败！！！
@@ -65,6 +67,10 @@ namespace MOD_WIFdSk
         //    RemovePinyinEntries();
         //}
 
+
+        /// <summary>
+        /// Remove all Pinyin entries from reg
+        /// </summary>
         private void RemovePinyinEntries()
         {
             /// see https://github.com/sabresaurus/PlayerPrefsEditor/blob/1.4.1/Editor/PlayerPrefsEditor.cs#L273
@@ -94,6 +100,51 @@ namespace MOD_WIFdSk
             catch (System.Exception ex)
             {
                 System.Console.WriteLine("[DaGuiPlayerPrefsFix] Failed to run OnSaveData: " + ex.ToString());
+            }
+        }
+
+        private static string[] GetNonPinyinPlayerPrefsKeys()
+        {
+            try
+            {
+                Microsoft.Win32.RegistryKey registryKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("Software\\guigugame\\guigubahuang");
+                List<string> tempKeys = new List<string>();
+                int pSettingCount = 0;
+                int pinyinCount = 0;
+                if (registryKey != null)
+                {
+                    string[] valueName = registryKey.GetValueNames();
+                    foreach (string name in valueName)
+                    {
+                        bool hit = false;
+                        string[] substrings = name.Split('_');
+                        foreach (string substring in substrings)
+                        {
+                            if (substring == "pinyin" || substring == "py")
+                            {
+                                pinyinCount++;
+                                hit = true;
+                                break;
+                            }
+                        }
+                        if (!hit)
+                        {
+                            pSettingCount++;
+                            tempKeys.Add(name);
+                    }
+                    }
+                    System.Console.WriteLine("[DaGuiPlayerPrefsFix]  " + pSettingCount + " settings and " + pinyinCount + " pinyin/py");
+                    return tempKeys.ToArray();
+                }
+                else
+                {
+                    return new string[0];  
+                }
+            }
+            catch (System.Exception ex)
+            {
+                System.Console.WriteLine("[DaGuiPlayerPrefsFix] Failed to run OnSaveData: " + ex.ToString());
+                return new string[0];
             }
         }
     }
