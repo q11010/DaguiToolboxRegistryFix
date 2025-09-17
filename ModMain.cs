@@ -129,7 +129,9 @@ namespace MOD_WIFdSk
                 MelonLoader.MelonLogger.Msg("[DaGuiPlayerPrefsFix] No Valid PlayerPrefs, stopping");
                 return;
             }
+            MelonLoader.MelonLogger.Msg("[DaGuiPlayerPrefsFix] Delete All PlayerPrefs...");
             PlayerPrefs.DeleteAll();
+            MelonLoader.MelonLogger.Msg("[DaGuiPlayerPrefsFix] Restore " + rawPlayerPrefs.Length + " Needed PlayerPrefs...");
             foreach (PlayerPrefsHelper.PlayerPrefsHelper.RawPlayerPrefs raw in rawPlayerPrefs)
             {
                 PlayerPrefsHelper.PlayerPrefsHelper.SetPlayerPrefs(raw);
@@ -159,7 +161,7 @@ namespace MOD_WIFdSk
                             tempKeys.Add(key);
                         }
                     }
-                    MelonLoader.MelonLogger.Msg("[DaGuiPlayerPrefsFix]  " + pSettingCount + " settings and " + pinyinCount + " pinyin/py");
+                    MelonLoader.MelonLogger.Msg("[DaGuiPlayerPrefsFix] " + pSettingCount + " settings and " + pinyinCount + " pinyin/py");
                     return tempKeys.ToArray();
                 }
                 else
