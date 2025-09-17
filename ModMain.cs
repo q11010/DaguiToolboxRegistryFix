@@ -129,7 +129,9 @@ namespace MOD_WIFdSk
                 MelonLoader.MelonLogger.Msg("[DaGuiPlayerPrefsFix] No Valid PlayerPrefs, stopping");
                 return;
             }
+            MelonLoader.MelonLogger.Msg("[DaGuiPlayerPrefsFix] Delete All PlayerPrefs...");
             PlayerPrefs.DeleteAll();
+            MelonLoader.MelonLogger.Msg("[DaGuiPlayerPrefsFix] Restore " + rawPlayerPrefs.Length + " Needed PlayerPrefs...");
             foreach (PlayerPrefsHelper.PlayerPrefsHelper.RawPlayerPrefs raw in rawPlayerPrefs)
             {
                 PlayerPrefsHelper.PlayerPrefsHelper.SetPlayerPrefs(raw);
