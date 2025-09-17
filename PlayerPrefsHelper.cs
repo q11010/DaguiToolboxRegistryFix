@@ -53,7 +53,7 @@ namespace MOD_WIFdSk.PlayerPrefsHelper
             }
             else
             {
-                System.Console.Error.WriteLine("[DaGuiPlayerPrefsFix] No valid type for: " + processed_key);
+                MelonLoader.MelonLogger.Msg("[DaGuiPlayerPrefsFix] No valid type for: " + processed_key);
                 return new RawPlayerPrefs { Key = processed_key, Value = null };
             }
 
@@ -72,7 +72,7 @@ namespace MOD_WIFdSk.PlayerPrefsHelper
                 PlayerPrefs.SetString(raw_player_prefs.Key, (string)raw_player_prefs.Value);
             } else
             {
-                System.Console.Error.WriteLine("[DaGuiPlayerPrefsFix] PlayerPrefs " + raw_player_prefs.Key + "has no valid key");
+                MelonLoader.MelonLogger.Msg("[DaGuiPlayerPrefsFix] PlayerPrefs " + raw_player_prefs.Key + "has no valid key");
             }
         }
     }

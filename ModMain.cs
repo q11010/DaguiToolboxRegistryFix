@@ -56,7 +56,7 @@ namespace MOD_WIFdSk
             stopwatch.Start();
             RemovePinyinEntries();
             stopwatch.Stop();
-            System.Console.WriteLine("[DaGuiPlayerPrefsFix] Cleaner executed on destroy, time " + stopwatch.Elapsed);
+            MelonLoader.MelonLogger.Msg("[DaGuiPlayerPrefsFix] Cleaner executed on destroy, time " + stopwatch.Elapsed);
         }
 
         /// <summary>
@@ -94,14 +94,14 @@ namespace MOD_WIFdSk
                         if (key.EndsWith("py") || key.EndsWith("pinyin"))
                         {
                             count++;
-                            if (count % 500 == 0)
+                            if (count % 1000 == 0)
                             {
                                 System.Console.WriteLine("[DaGuiPlayerPrefsFix] In Progress: " + count);
                             }
                             PlayerPrefs.DeleteKey(name);
                         }
                     }
-                    System.Console.WriteLine("[DaGuiPlayerPrefsFix] " + count + " entries deleted");
+                    MelonLoader.MelonLogger.Msg("[DaGuiPlayerPrefsFix] " + count + " entries deleted");
                     // check success
                     valueName = registryKey.GetValueNames();
                     foreach (string name in valueName)
@@ -109,7 +109,7 @@ namespace MOD_WIFdSk
                         string key = PlayerPrefsHelper.PlayerPrefsHelper.CleanPlayerPrefsKey(name);
                         if (key.EndsWith("py") || key.EndsWith("pinyin"))
                         {
-                            System.Console.Error.WriteLine("[DaGuiPlayerPrefsFix] Failed Clean for entry " + name);
+                            MelonLoader.MelonLogger.Msg("[DaGuiPlayerPrefsFix] Failed Clean for entry " + name);
 
                         }
                     }
@@ -119,7 +119,17 @@ namespace MOD_WIFdSk
             }
             catch (System.Exception ex)
             {
-                System.Console.WriteLine("[DaGuiPlayerPrefsFix] Failed to run OnSaveData: " + ex.ToString());
+                MelonLoader.MelonLogger.Msg("[DaGuiPlayerPrefsFix] Failed to run OnSaveData: " + ex.ToString());
+            }
+        }
+
+        public void ProbablyFastRemovePinyinEntries()
+        {
+            PlayerPrefsHelper.PlayerPrefsHelper.RawPlayerPrefs[] rawPlayerPrefs = GetNonPinyinPlayerPrefs();
+            PlayerPrefs.DeleteAll();
+            foreach (PlayerPrefsHelper.PlayerPrefsHelper.RawPlayerPrefs raw in rawPlayerPrefs)
+            {
+                PlayerPrefsHelper.PlayerPrefsHelper.SetPlayerPrefs(raw);
             }
         }
 
@@ -146,7 +156,7 @@ namespace MOD_WIFdSk
                             tempKeys.Add(key);
                         }
                     }
-                    System.Console.WriteLine("[DaGuiPlayerPrefsFix]  " + pSettingCount + " settings and " + pinyinCount + " pinyin/py");
+                    MelonLoader.MelonLogger.Msg("[DaGuiPlayerPrefsFix]  " + pSettingCount + " settings and " + pinyinCount + " pinyin/py");
                     return tempKeys.ToArray();
                 }
                 else
@@ -156,7 +166,7 @@ namespace MOD_WIFdSk
             }
             catch (System.Exception ex)
             {
-                System.Console.WriteLine("[DaGuiPlayerPrefsFix] Failed to run OnSaveData: " + ex.ToString());
+                MelonLoader.MelonLogger.Msg("[DaGuiPlayerPrefsFix] Failed to run OnSaveData: " + ex.ToString());
                 return new string[0];
             }
         }
