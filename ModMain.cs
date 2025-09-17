@@ -3,6 +3,8 @@ using System.Reflection;
 using UnityEngine;
 using MOD_WIFdSk.PlayerPrefsHelper;
 using Boo.Lang;
+using System.Diagnostics;
+using MelonLoader;
 
 /// <summary>
 /// 当你手动修改了此命名空间，需要去模组编辑器修改对应的新命名空间，程序集也需要修改命名空间，否则DLL将加载失败！！！
@@ -50,8 +52,11 @@ namespace MOD_WIFdSk
         public void Destroy()
         {
             g.timer.Stop(corUpdate);
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
             RemovePinyinEntries();
-            System.Console.WriteLine("[DaGuiPlayerPrefsFix] Cleaner executed on destroy");
+            stopwatch.Stop();
+            System.Console.WriteLine("[DaGuiPlayerPrefsFix] Cleaner executed on destroy, time " + stopwatch.Elapsed);
         }
 
         /// <summary>
@@ -82,20 +87,35 @@ namespace MOD_WIFdSk
                 if (registryKey != null)
                 {
                     string[] valueName = registryKey.GetValueNames();
+                    int count = 0;
                     foreach (string name in valueName)
                     {
-                        string[] substrings = name.Split('_');
-                        foreach (string substring in substrings)
+                        string key = PlayerPrefsHelper.PlayerPrefsHelper.CleanPlayerPrefsKey(name);
+                        if (key.EndsWith("py") || key.EndsWith("pinyin"))
                         {
-                            if (substring == "pinyin" || substring == "py")
+                            count++;
+                            if (count % 500 == 0)
                             {
-                                System.Console.WriteLine("[DaGuiPlayerPrefsFix] " + name + " cleaned");
-                                PlayerPrefs.DeleteKey(name);
-                                break;
+                                System.Console.WriteLine("[DaGuiPlayerPrefsFix] In Progress: " + count);
                             }
+                            PlayerPrefs.DeleteKey(name);
+                        }
+                    }
+                    System.Console.WriteLine("[DaGuiPlayerPrefsFix] " + count + " entries deleted");
+                    // check success
+                    valueName = registryKey.GetValueNames();
+                    foreach (string name in valueName)
+                    {
+                        string key = PlayerPrefsHelper.PlayerPrefsHelper.CleanPlayerPrefsKey(name);
+                        if (key.EndsWith("py") || key.EndsWith("pinyin"))
+                        {
+                            System.Console.Error.WriteLine("[DaGuiPlayerPrefsFix] Failed Clean for entry " + name);
+
                         }
                     }
                 }
+
+
             }
             catch (System.Exception ex)
             {
@@ -116,22 +136,15 @@ namespace MOD_WIFdSk
                     string[] valueName = registryKey.GetValueNames();
                     foreach (string name in valueName)
                     {
-                        bool hit = false;
-                        string[] substrings = name.Split('_');
-                        foreach (string substring in substrings)
+                        string key = PlayerPrefsHelper.PlayerPrefsHelper.CleanPlayerPrefsKey(name);
+                        if (key.EndsWith("py") || key.EndsWith("pinyin"))
                         {
-                            if (substring == "pinyin" || substring == "py")
-                            {
-                                pinyinCount++;
-                                hit = true;
-                                break;
-                            }
-                        }
-                        if (!hit)
+                           pinyinCount++;
+                        } else
                         {
                             pSettingCount++;
-                            tempKeys.Add(name);
-                    }
+                            tempKeys.Add(key);
+                        }
                     }
                     System.Console.WriteLine("[DaGuiPlayerPrefsFix]  " + pSettingCount + " settings and " + pinyinCount + " pinyin/py");
                     return tempKeys.ToArray();
@@ -146,6 +159,17 @@ namespace MOD_WIFdSk
                 System.Console.WriteLine("[DaGuiPlayerPrefsFix] Failed to run OnSaveData: " + ex.ToString());
                 return new string[0];
             }
+        }
+
+        private static PlayerPrefsHelper.PlayerPrefsHelper.RawPlayerPrefs[] GetNonPinyinPlayerPrefs()
+        {
+            string[] keys = GetNonPinyinPlayerPrefsKeys();
+            List<PlayerPrefsHelper.PlayerPrefsHelper.RawPlayerPrefs> tempRawPlayerPrefs = new List<PlayerPrefsHelper.PlayerPrefsHelper.RawPlayerPrefs> ();
+            foreach (string key in keys)
+            {
+                tempRawPlayerPrefs.Add(PlayerPrefsHelper.PlayerPrefsHelper.GetRawPlayerPrefsFromReg(key));
+            }
+            return tempRawPlayerPrefs.ToArray();
         }
     }
 }
