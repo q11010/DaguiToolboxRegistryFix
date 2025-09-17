@@ -13,7 +13,7 @@ namespace MOD_WIFdSk
     public class ModMain
     {
         private TimerCoroutine corUpdate;
-		private static HarmonyLib.Harmony harmony;
+        private static HarmonyLib.Harmony harmony;
         private Il2CppSystem.Action<ETypeData> onSaveDataCall;
 
         /// <summary>
@@ -21,23 +21,25 @@ namespace MOD_WIFdSk
         /// </summary>
         public void Init()
         {
-			//使用了Harmony补丁功能的，需要手动启用补丁。
-			//启动当前程序集的所有补丁
-			if (harmony != null)
-			{
-				harmony.UnpatchSelf();
-				harmony = null;
-			}
-			if (harmony == null)
-			{
-				harmony = new HarmonyLib.Harmony("MOD_WIFdSk");
-			}
-			harmony.PatchAll(Assembly.GetExecutingAssembly());
+            //使用了Harmony补丁功能的，需要手动启用补丁。
+            //启动当前程序集的所有补丁
+            if (harmony != null)
+            {
+                harmony.UnpatchSelf();
+                harmony = null;
+            }
+            if (harmony == null)
+            {
+                harmony = new HarmonyLib.Harmony("MOD_WIFdSk");
+            }
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-            corUpdate = g.timer.Frame(new Action(OnUpdate), 1, true);
-            onSaveDataCall = (System.Action<ETypeData>)OnSaveData;
-            g.events.On(EGameType.SaveData, onSaveDataCall, 0);
-            System.Console.WriteLine("[DaGuiPlayerPrefsFix] Cleaner Injected to run on save game");
+            // run on save; not needed
+
+            //corUpdate = g.timer.Frame(new Action(OnUpdate), 1, true);
+            //onSaveDataCall = (System.Action<ETypeData>)OnSaveData;
+            //g.events.On(EGameType.SaveData, onSaveDataCall, 0);
+            //System.Console.WriteLine("[DaGuiPlayerPrefsFix] Cleaner Injected to run on save game");
         }
 
         /// <summary>
@@ -58,10 +60,10 @@ namespace MOD_WIFdSk
 
         }
 
-        private void OnSaveData(ETypeData e)
-        {
-            RemovePinyinEntries();
-        }
+        //private void OnSaveData(ETypeData e)
+        //{
+        //    RemovePinyinEntries();
+        //}
 
         private void RemovePinyinEntries()
         {
